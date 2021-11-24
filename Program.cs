@@ -180,8 +180,8 @@ class Racing {
     protected const string SHIELD = "SHIELD";
     protected const int DEFAULT_CORRECTION_THRESHOLD_SPEED = 250;
 
-    public const int BURN_HARD = 100;
-    public const int BURN_STEADY = 75;
+    public const int BURN_HARD = 200;
+    public const int BURN_STEADY = 150;
     public const int BURN_SLOW = 35;
     public const int BURN_STALL = 15;
 
@@ -513,7 +513,7 @@ class Racing {
 
         return this.raceStrategy switch {
             RacingStrategy.BOOSTING => throw new Exception("Should not be able to determine thrust during boosting stage"),
-            RacingStrategy.BOOSTING_PLAY_OUT => "100",
+            RacingStrategy.BOOSTING_PLAY_OUT => "200",
             RacingStrategy.STALL_PLAY_OUT => "0",
             RacingStrategy.BURN_TOWARD 
                 => this.CanBoost() && this.ShouldBoost(x, y, currentAngleToGoal, distanceToCheckPoint) 
@@ -768,7 +768,7 @@ class Interference : Racing
             return this.DetermineOutputsForZoneBlock(x, y, vx, vy, currentAngle, inputs, lapsCompleted);
         }
 
-        return (inputs[this.currentTargetId].X, inputs[this.currentTargetId].Y, (100).ToString());
+        return (inputs[this.currentTargetId].X, inputs[this.currentTargetId].Y, (BURN_HARD).ToString());
     }
 
     private (int x, int y, string thrust) DetermineOutputsForRelocation(int x, int y, int vx, int vy, int currentAngle, InputData[] inputs, int lapsCompleted)
@@ -794,7 +794,7 @@ class Interference : Racing
         (int pX, int pY) = (partner.X, partner.Y);
 
         double intendedTravelAngle = Math.Atan2(oY - y, oX - x);
-        (int aX, int aY) = (vx + (int)Math.Floor(100 * Math.Cos(intendedTravelAngle)), vy + (int)Math.Floor(100 * Math.Sin(intendedTravelAngle)));
+        (int aX, int aY) = (vx + (int)Math.Floor(BURN_HARD * Math.Cos(intendedTravelAngle)), vy + (int)Math.Floor(BURN_HARD * Math.Sin(intendedTravelAngle)));
 
         (int fVX, int fVY) = (vx , vy);
 
@@ -834,7 +834,7 @@ class Interference : Racing
             }
         }
 
-        return (oX, oY, (100).ToString());
+        return (oX, oY, (BURN_HARD).ToString());
     }
 
 
@@ -856,7 +856,7 @@ class Interference : Racing
             return (oX, oY, "SHIELD");
         }
 
-        return (oX, oY, (distanceToTarget < 500 ? 70 : 100).ToString());
+        return (oX, oY, (distanceToTarget < 500 ? BURN_STEADY : BURN_HARD).ToString());
     }
 
     private (int x, int y, string thrust) DetermineOutputsForZoneBlock(int x, int y, int vx, int vy, int currentAngle, InputData[] inputs, int lapsCompleted)
@@ -914,7 +914,7 @@ class Interference : Racing
         bool needToRotate = Math.Abs(offSetForIdealFacingAngle) < 26 ? false : true;
         Console.Error.WriteLine($"idealFacingAngle {offSetForIdealFacingAngle} | currentAngle {currentAngle}");
 
-        return (oX, oY, (needToRotate ? 35 : 100).ToString());
+        return (oX, oY, (needToRotate ? BURN_SLOW : BURN_HARD).ToString());
     }
 
     private double DetermineCompensationFactor(int vx, int vy, InputData targetData)
@@ -946,8 +946,8 @@ class Interference : Racing
 
     private (int Vx, int Vy) AccountForTargetVelocity(int x, int y, int vx, int vy, InputData targetData, double maxDiffOffset = 1)
     {
-        int projectedVx = targetData.Vx + (int)Math.Floor(Math.Cos(targetData.Angle) * 100);
-        int projectedVy = targetData.Vy + (int)Math.Floor(Math.Sin(targetData.Angle) * 100);
+        int projectedVx = targetData.Vx + (int)Math.Floor(Math.Cos(targetData.Angle) * BURN_HARD);
+        int projectedVy = targetData.Vy + (int)Math.Floor(Math.Sin(targetData.Angle) * BURN_HARD);
 
         return (projectedVx, projectedVy);
     }
